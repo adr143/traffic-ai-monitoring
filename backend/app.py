@@ -2,6 +2,8 @@ from flask import Flask, render_template
 from ultralytics import YOLO
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
+from flask_bcrypt import Bcrypt
 from routes import Routes
 from models import db
 import base64
@@ -27,10 +29,12 @@ app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
 app.config["MAIL_USERNAME"] = ""
-app.config["MAIL_PASSWORD"] = "your_password"
+app.config["MAIL_PASSWORD"] = ""
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 jwt = JWTManager(app)
+bcrypt = Bcrypt(app)
+mail = Mail(app)
 CORS(app, resources={r"*": {"origins": "*"}})
 routes = Routes(app, db)
 

@@ -1,8 +1,9 @@
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask import Flask, Blueprint, request, jsonify, Response
+from models import Vehicle, Violation, vehicle_violation
 from multiprocessing import Process
 from flask_socketio import SocketIO
-from models import Vehicle, Violation, vehicle_violation
+from flask_mail import Message
 from threading import Thread
 from camera import Camera
 import pytesseract
@@ -13,9 +14,11 @@ import os
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 class Routes:
-    def __init__(self, app, db):
+    def __init__(self, app, db, bcrypt, mail):
         self.app = app
         self.db = db
+        self.bcrypt = bcrypt
+        self.mail = mail
         self.main_bp = Blueprint('main', __name__)
         self.socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -37,6 +40,8 @@ class Routes:
         self.main_bp.add_url_rule('/get_speed_limit', 'get_speed_limit', self.get_speed_limit, methods=['GET'])
         self.main_bp.add_url_rule('/update_speed_limit', 'update_speed_limit', self.update_speed_limit, methods=['POST'])
         self.main_bp.add_url_rule('/get_license_text/<int:vehicle_id>', 'get_license_text', self.get_license_text, methods=['GET'])
+        self.main_bp.add_url_rule('/confirm/<token>', 'confirm_email', self.confirm_email, methods=['GET'])
+        self.main_bp.add_url_rule('/register', 'register', self.register, methods=['POST'])
         
         self.app.register_blueprint(self.main_bp)
         self.db.init_app(self.app)
@@ -59,6 +64,31 @@ class Routes:
                     self.db.session.add(Violation(name=violation_name))
             
             self.db.session.commit()
+
+    def register(self):
+        data = request.json
+        hashed_password = self.bcrypt.generate_password_hash(data["password"]).decode("utf-8")
+        user = User(username=data["username"], email=data["email"], password=hashed_password)
+        self.db.session.add(user)
+        self.db.session.commit()
+
+        # Send Confirmation Email
+        token = create_access_token(identity=user.email, expires_delta=False)
+        confirm_url = url_for("confirm_email", token=token, _external=True)
+        msg = Message("Confirm Your Email", sender=app.config["MAIL_DEFAULT_SENDER"], recipients=[user.email])
+        msg.body = f"Click the link to confirm your email: {confirm_url}"
+        self.mail.send(msg)
+
+        return jsonify({"message": "User registered. Please check your email to confirm your account."}), 201
+
+    def confirm_email(self, token):
+        user_email = jwt.decode_token(token)["sub"]
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            return jsonify({"message": "Invalid token"}), 400
+        user.confirmed = True
+        db.session.commit()
+        return jsonify({"message": "Email confirmed successfully!"}), 200
 
     def get_vehicles(self):
         vehicles = Vehicle.query.all()

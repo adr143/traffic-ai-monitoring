@@ -4,6 +4,13 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    confirmed = db.Column(db.Boolean, default=False)
+
 # Association table
 vehicle_violation = db.Table('vehicle_record',
     db.Column('vehicle_id', db.Integer, db.ForeignKey('vehicle.id'), primary_key=True),
