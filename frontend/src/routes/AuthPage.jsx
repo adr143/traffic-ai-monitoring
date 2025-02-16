@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, register, logout } from "../auth/auth";
 
-const LoginPage = () => {
+const AuthPage = ({local_url}) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -12,7 +12,7 @@ const LoginPage = () => {
   const handleAuth = async (e) => {
     e.preventDefault();
     if (isRegistering) {
-      const success = await register(username, email, password);
+      const success = await register(username, email, password, local_url);
       if (success) {
         alert("Registration successful. Check your email for confirmation.");
         setIsRegistering(false);
@@ -20,7 +20,7 @@ const LoginPage = () => {
         alert("Registration failed.");
       }
     } else {
-      const success = await login(username, password);
+      const success = await login(username, password, local_url);
       if (success) {
         alert("Logged in successfully");
         navigate("/");
@@ -66,4 +66,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AuthPage;

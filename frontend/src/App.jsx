@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./routes/Dashboard";
 import VehicleDetail from "./routes/VehicleDetail";
-import LoginPage from "./routes/LoginPage";
+import AuthPage from "./routes/AuthPage";
 import Settings from "./routes/Settings";
 import VehicleRecords from "./routes/VehicleRecords";
 import VehicleAnalytics from "./routes/VehicleAnalytics";
@@ -21,7 +21,7 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="/login" element={<AuthPage local_url={local_url} />} />
                 <Route path="/" element={<PrivateRoute><Dashboard socket={socket} local_url={local_url} /></PrivateRoute>} />
                 <Route path="/settings" element={<PrivateRoute><Settings socket={socket} local_url={local_url} /></PrivateRoute>} />
                 <Route path="/vehicle/:id" element={<PrivateRoute><VehicleDetail local_url={local_url} /></PrivateRoute>} />
