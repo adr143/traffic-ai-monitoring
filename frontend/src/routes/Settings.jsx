@@ -100,7 +100,7 @@ const Settings = ({ socket, local_url }) => {
     return (
         <div className="grid grid-rows-[auto_1fr] gap-4 h-screen w-screen p-8">
             <nav className="flex justify-between items-center bg-white shadow-md py-4 px-6 rounded-lg">
-                <h1 className="text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>Traffic Monitoring System</h1>
+                <h1 className="text-2xl font-bold cursor-pointer" onClick={() => navigate("/dashboard")}>Traffic Monitoring System</h1>
                 <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md" onClick={handleLogout}>
                     Logout
                 </button>

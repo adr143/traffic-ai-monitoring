@@ -23,7 +23,7 @@ const AuthPage = ({local_url}) => {
       const success = await login(username, password, local_url);
       if (success) {
         alert("Logged in successfully");
-        navigate("/");
+        navigate("/dashboard");
       } else {
         alert("Invalid credentials");
       }
@@ -56,11 +56,6 @@ const AuthPage = ({local_url}) => {
             {isRegistering ? "Already have an account? Login" : "Don't have an account? Register"}
           </button>
         </div>
-        {!isRegistering && (
-          <button onClick={handleLogout} className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 w-full">
-            Logout
-          </button>
-        )}
       </div>
     </div>
   );

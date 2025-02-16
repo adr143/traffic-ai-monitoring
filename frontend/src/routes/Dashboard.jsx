@@ -48,7 +48,7 @@ const Dashboard = ({ socket, local_url }) => {
     return (
         <div className="grid grid-rows-[auto_1fr] gap-4 h-screen w-screen p-4 md:p-8">
             <nav className="px-4 flex justify-between items-center bg-white shadow-md py-4 rounded-lg">
-                <h1 className="text-xl md:text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>Traffic Monitoring System</h1>
+                <h1 className="text-xl md:text-2xl font-bold cursor-pointer" onClick={() => navigate("/dashboard")}>Traffic Monitoring System</h1>
                 <div className="relative" ref={dropdownRef}>
                     <button
                         className="bg-gray-700 text-white px-4 py-2 rounded-md focus:outline-none"

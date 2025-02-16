@@ -24,7 +24,7 @@ const VehicleDetail = ({local_url}) => {
 
     return (
         <div className="grid grid-rows-[1fr_9fr] h-screen items-center">
-            <h1 className="text-2xl font-bold cursor-pointer text-center" onClick={() => navigate("/")} >Traffic Monitoring System</h1>
+            <h1 className="text-2xl font-bold cursor-pointer text-center" onClick={() => navigate("/dashboard")} >Traffic Monitoring System</h1>
             <div className="grid grid-cols-2 gap-4 max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-lg">
                 {/* Vehicle ID */}
                 <div className="p-4">

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        img { max-width: 150px; height: auto; }
+    </style>
+</head>
+<body>
+    <h2>Daily Vehicle Report</h2>
+    <p>Here are the logged vehicles for today:</p>
+    
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Image</th>
+            <th>License Plate</th>
+            <th>Violations</th>
+            <th>Speed</th>
+        </tr>
+        {% for vehicle in vehicles %}
+        <tr>
+            <td>{{ vehicle.id }}</td>
+            <td>
+                {% if vehicle.image_path %}
+                    <img src="{{ vehicle.image_path }}" alt="Vehicle Image">
+                {% else %}
+                    No Image
+                {% endif %}
+            </td>
+            <td>
+                {% if vehicle.license_path %}
+                    <img src="{{ vehicle.license_path }}" alt="License Plate">
+                {% else %}
+                    No License Image
+                {% endif %}
+            </td>
+            <td>{{ vehicle.violations | join(", ") }}</td>
+            <td>{{ vehicle.speed }} km/h</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

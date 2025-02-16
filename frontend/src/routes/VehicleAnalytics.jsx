@@ -66,7 +66,7 @@ const VehicleAnalytics = ({ local_url }) => {
     return (
         <div className="grid grid-rows-[auto_1fr] gap-4 h-screen w-screen p-8">
             <nav className="flex justify-center items-center bg-white shadow-md py-4 px-6 rounded-lg">
-                <h1 className="text-2xl text-center font-bold cursor-pointer" onClick={() => navigate("/")}>Traffic Monitoring System</h1>
+                <h1 className="text-2xl text-center font-bold cursor-pointer" onClick={() => navigate("/dashboard")}>Traffic Monitoring System</h1>
             </nav>
             <div className="p-6 max-w-6xl mx-auto bg-white shadow-lg rounded-lg">
                 <h1 className="text-2xl font-bold mb-4">Vehicle Violation Analytics</h1>

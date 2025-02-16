@@ -28,15 +28,15 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(),'static')
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = "visual.creativity109@gmail.com"
-app.config["MAIL_PASSWORD"] = "vveo zymy khbl flia"
-app.config["MAIL_DEFAULT_SENDER"] = "visual.creativity109@gmail.com"
+app.config["MAIL_USERNAME"] = ""
+app.config["MAIL_PASSWORD"] = ""
+app.config["MAIL_DEFAULT_SENDER"] = ""
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
-CORS(app, resources={r"*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 routes = Routes(app, db, bcrypt, mail, jwt)
 
 if __name__ == '__main__':

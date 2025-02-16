@@ -1,14 +1,17 @@
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
-from flask import Flask, Blueprint, request, jsonify, Response, url_for
-from models import Vehicle, Violation, vehicle_violation, User
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask, Blueprint, request, jsonify, Response, url_for, render_template
+from models import Vehicle, Violation, vehicle_violation, User, Subscriber
 from multiprocessing import Process
 from flask_socketio import SocketIO
 from flask_mail import Message
+from datetime import datetime
 from threading import Thread
 from camera import Camera
 import pytesseract
 import threading
 import base64
+import pytz
 import os
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -43,11 +46,18 @@ class Routes:
         self.main_bp.add_url_rule('/get_license_text/<int:vehicle_id>', 'get_license_text', self.get_license_text, methods=['GET'])
         self.main_bp.add_url_rule('/confirm/<token>', 'confirm_email', self.confirm_email, methods=['GET'])
         self.main_bp.add_url_rule('/auth/register', 'register', self.register, methods=['POST'])
+        self.main_bp.add_url_rule('/subscribe', 'subscribe', self.subscribe, methods=['POST'])
+        self.main_bp.add_url_rule('/get_time_now', 'get_time_now', self.get_time_now, methods=['GET'])
         
         self.app.register_blueprint(self.main_bp)
         self.db.init_app(self.app)
+        self.app.after_request(self.add_cors_headers)
 
         self.initialize_violations()
+
+    def start_run(self, host='0.0.0.0', port=5000):
+        self.start_scheduler()
+        self.socketio.run(self.app, host=host, port=port)
 
     def initialize_violations(self):
         with self.app.app_context():
@@ -65,6 +75,13 @@ class Routes:
                     self.db.session.add(Violation(name=violation_name))
             
             self.db.session.commit()
+
+    def add_cors_headers(self, response):
+        """ Ensure proper CORS headers are added to all responses. """
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
 
     def register(self):
         data = request.json
@@ -101,6 +118,67 @@ class Routes:
             return jsonify({"message": "Email not confirmed"}), 401
         access_token = create_access_token(identity=user.username)
         return jsonify({"access_token": access_token}), 200
+
+    def subscribe(self):
+        print("Subscribing")
+        data = request.get_json()
+        email = data.get("email")
+
+        if not email or "@" not in email:
+            return jsonify({"message": "Invalid email"}), 400
+
+        with self.app.app_context():
+            existing_subscriber = Subscriber.query.filter_by(email=email).first()
+            if existing_subscriber:
+                return jsonify({"message": "Email already subscribed"}), 409
+
+            new_subscriber = Subscriber(email=email)
+            self.db.session.add(new_subscriber)
+            self.db.session.commit()
+
+        return jsonify({"message": "Subscription successful"}), 201
+
+    def start_scheduler(self):
+        scheduler = BackgroundScheduler(timezone=pytz.timezone("Asia/Manila"))  # Set to your timezone
+        scheduler.add_job(lambda: self.send_daily_report(), "cron", hour=8, minute=0)  # Run at 8:00 AM daily
+        scheduler.start()
+
+    def get_time_now(self):
+        manila_time = pytz.timezone("Asia/Manila")
+        self.send_daily_report()
+        return  jsonify({"DateTime":datetime.now(manila_time).strftime("%Y-%m-%d %H:%M:%S %Z")})
+
+    def send_daily_report(self):
+        with self.app.app_context():
+            # Fetch vehicles registered today
+            today = datetime.utcnow().date()
+            vehicles = Vehicle.query.all()  # Change to filter by today if needed
+
+            # if not vehicles:
+            #     print("No new records for today.")
+            #     return
+            
+            # Prepare the HTML email content
+            email_body = render_template("daily_report.html", vehicles=vehicles)
+
+            # Fetch all subscribed users (replace with your user model)
+            subscribers = Subscriber.query.all()  # Replace with your subscriber model
+            if not subscribers:
+                print("No subscribers found.")
+                return
+            
+            recipient_emails = [subscriber.email for subscriber in subscribers]
+
+            for email in subscribers:
+                msg = Message(
+                    subject="Daily Vehicle Report",
+                    sender=self.app.config["MAIL_DEFAULT_SENDER"],
+                    recipients=recipient_emails,
+                    html=email_body
+                )
+                self.mail.send(msg)
+
+            print(f"Sent daily report to {len(subscribers)} subscribers.")
 
     def get_vehicles(self):
         vehicles = Vehicle.query.all()
@@ -158,10 +236,6 @@ class Routes:
             license_text = "XXXX-XXXX"
 
         return jsonify({"license_text": license_text})
-
-
-    def start_run(self, host='0.0.0.0', port=5000):
-        self.socketio.run(self.app, host=host, port=port)
 
     def cameras(self):
         with self.app.app_context():

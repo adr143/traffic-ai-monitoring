@@ -56,7 +56,7 @@ const VehicleRecords = ({ local_url }) => {
         <div className="flex flex-col h-screen w-screen bg-gray-100">
             {/* Navigation Bar */}
             <nav className="bg-white shadow-md p-4 flex justify-center sticky top-0 z-50">
-                <h1 className="text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>Traffic Monitoring System</h1>
+                <h1 className="text-2xl font-bold cursor-pointer" onClick={() => navigate("/dashboard")}>Traffic Monitoring System</h1>
             </nav>
 
             {/* Main Content */}

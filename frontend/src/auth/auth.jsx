@@ -29,9 +29,6 @@ export const isAuthenticated = () => {
 
 export const register = async (username, email, password, local_url) => {
   try {
-    console.log("Registering user:", username, email);
-    console.log("API URL:", `${local_url}/auth/register`);
-    
     const response = await fetch(`${local_url}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
